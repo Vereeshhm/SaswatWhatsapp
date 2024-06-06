@@ -11,54 +11,84 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import com.example.SaswatWhatsapp.Repository.ApiLogRepository;
 import com.example.SaswatWhatsapp.Repository.InsuranceRepo;
 import com.example.SaswatWhatsapp.Service.InsuranceService;
+import com.example.SaswatWhatsapp.Utils.ApiLog;
 import com.example.SaswatWhatsapp.Utils.InsuranceDTO;
+
+import com.google.gson.Gson;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class InsuranceServiceImpl implements InsuranceService {
 
 	@Autowired
-	InsuranceRepo insuranceRepo;
+	private InsuranceRepo insuranceRepo;
 
-	public void InsuranceRepo(InsuranceRepo insuranceRepo) {
-		this.insuranceRepo = insuranceRepo;
-	}
+	@Autowired
+	ApiLogRepository apiLogRepository;
 
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
 	public InsuranceServiceImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@Override
-	public ResponseEntity<InsuranceDTO> getinsuranceByMobileNumber(String mobile_no) throws IOException {
+	public ResponseEntity<InsuranceDTO> getinsuranceByMobileNumber(String mobile_no, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 
 		List<InsuranceDTO> resultsJPA = this.insuranceRepo.findByMobile_no(mobile_no);
 
-		// If no records found in JPA repository, fall back to JdbcTemplate
+		String requestUrl = request.getRequestURL().toString();
+		Gson gson = new Gson();
+
+		// Capture request body
+		String requestBodyJson = gson.toJson(mobile_no);
+		int statusCodeValue = response.getStatus();
+
+		// Create and save ApiLog
+		ApiLog apiLog = new ApiLog();
+		apiLog.setUrl(requestUrl);
+		apiLog.setRequestBody(requestBodyJson);
+
+		ResponseEntity<InsuranceDTO> responseEntity;
+
 		if (resultsJPA.isEmpty()) {
-			String query = "SELECT mobile_no, customer_id, language_selected,insurance_exists , saswat_insurance_number_1,saswat_insurance_number_2,saswat_insurance_number_3,saswat_insurance_number_4,saswat_insurance_number_5,total FROM insurancetb1 WHERE mobile_no = ?";
+			String query = "SELECT mobile_no, customer_id , saswat_insurance_number_1,saswat_insurance_number_2,saswat_insurance_number_3,saswat_insurance_number_4,saswat_insurance_number_5,insurance_exists,total,language_selected FROM insurancetb1 WHERE mobile_no = ?";
 
 			List<InsuranceDTO> resultsJdbcTemplate = jdbcTemplate.query(query, ps -> ps.setString(1, mobile_no),
 					new insurancedtoRowMapper());
 
 			if (resultsJdbcTemplate.isEmpty()) {
-				return ResponseEntity.notFound().build();
-			} else {
-
-				return processResults(resultsJdbcTemplate.get(0));
-
+				responseEntity = ResponseEntity.notFound().build();
+			} else 
+			{
+				responseEntity = processResults(resultsJdbcTemplate.get(0));
 			}
 		} else {
-			return processResults(resultsJPA.get(0));
-
+			responseEntity = processResults(resultsJPA.get(0));
 		}
 
+		
+		apiLog.setResponseBody(gson.toJson(responseEntity.getBody()));
+
+		if (statusCodeValue == 200) {
+			apiLog.setStatusCode("SUCCESS");
+		} else {
+			apiLog.setStatusCode("FAILURE");
+		}
+		// Save ApiLog
+		apiLogRepository.save(apiLog);
+
+		return responseEntity;
 	}
 
 	private ResponseEntity<InsuranceDTO> processResults(InsuranceDTO dto) throws IOException {
-
 		return ResponseEntity.ok(dto);
 	}
 
@@ -66,17 +96,17 @@ public class InsuranceServiceImpl implements InsuranceService {
 		@Override
 		public InsuranceDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
 			InsuranceDTO dto = new InsuranceDTO();
-			// Map ResultSet columns to DTO fields
-			dto.setCustomer_id(rs.getString("customer_id"));
-			dto.setInsurance_exists(rs.getString("insurance_exists"));
+			
 			dto.setMobile_no(rs.getString("mobile_no"));
-			dto.setLanguage_selected(rs.getString("language_selected"));
+			dto.setCustomer_id(rs.getString("customer_id"));
 			dto.setSaswat_insurance_number_1(rs.getString("saswat_insurance_number_1"));
 			dto.setSaswat_insurance_number_2(rs.getString("saswat_insurance_number_2"));
 			dto.setSaswat_insurance_number_3(rs.getString("saswat_insurance_number_3"));
 			dto.setSaswat_insurance_number_4(rs.getString("saswat_insurance_number_4"));
 			dto.setSaswat_insurance_number_5(rs.getString("saswat_insurance_number_5"));
+			dto.setInsurance_exists(rs.getString("insurance_exists"));
 			dto.setTotal(rs.getString("total"));
+			dto.setLanguage_selected(rs.getString("language_selected"));
 			return dto;
 		}
 	}

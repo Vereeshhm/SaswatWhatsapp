@@ -1,5 +1,6 @@
 package com.example.SaswatWhatsapp.Utils;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,31 +15,41 @@ public class Insurance1Dto {
 
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="mobile_no")
 	private String mobile_no;
 	
+	@Column(name="customer_id")
 	private String customer_id;
 	
-	
+	@Column(name="policy_no_of_insurance")
 	private String policy_no_of_insurance;
 	
+	@Column(name="saswat_loan_number")
 	private String saswat_loan_number;
 	
+	@Column(name="loan_from")
 	private String loan_from;
 	
+	@Column(name="insurance_from")
 	private String insurance_from;
 	
+	@Column(name="insured_amount")
 	private String insured_amount;
 	
+	@Column(name="no_of_cattle")
 	private String no_of_cattle;
 	
-	
+	@Column(name="insured_date")
 	private String insured_date;
 	
+	@Column(name="insurance_validity_date")
 	private String insurance_validity_date;
 	
+	@Column(name="insurance_type")
 	private String insurance_type;
 	
+	@Column(name="insurance_status_active")
 	private String insurance_status_active;
 
 	public String getMobile_no() {
