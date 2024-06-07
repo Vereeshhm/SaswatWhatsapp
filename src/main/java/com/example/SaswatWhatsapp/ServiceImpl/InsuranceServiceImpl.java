@@ -13,10 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.SaswatWhatsapp.Repository.ApiLogRepository;
 import com.example.SaswatWhatsapp.Repository.InsuranceRepo;
+import com.example.SaswatWhatsapp.Repository.NewInsuranceCustomRepository;
 import com.example.SaswatWhatsapp.Service.InsuranceService;
 import com.example.SaswatWhatsapp.Utils.ApiLog;
 import com.example.SaswatWhatsapp.Utils.InsuranceDTO;
-
+import com.example.SaswatWhatsapp.Utils.InsuranceNewCustom;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,9 @@ public class InsuranceServiceImpl implements InsuranceService {
 
 	@Autowired
 	ApiLogRepository apiLogRepository;
+	
+	@Autowired
+	NewInsuranceCustomRepository customRepository;
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -65,6 +69,9 @@ public class InsuranceServiceImpl implements InsuranceService {
 					new insurancedtoRowMapper());
 
 			if (resultsJdbcTemplate.isEmpty()) {
+				InsuranceNewCustom custom=new InsuranceNewCustom();
+				custom.setMobile_no(mobile_no);
+				customRepository.save(custom);
 				responseEntity = ResponseEntity.notFound().build();
 			} else 
 			{
