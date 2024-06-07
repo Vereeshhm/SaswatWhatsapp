@@ -13,5 +13,7 @@ public interface InsuranceRepo extends JpaRepository<InsuranceDTO, Long> {
 	
 	@Query("SELECT s FROM InsuranceDTO s WHERE s.mobile_no = :mobileNo")
     List<InsuranceDTO> findByMobile_no(String mobileNo);
+	
+	
 
 }

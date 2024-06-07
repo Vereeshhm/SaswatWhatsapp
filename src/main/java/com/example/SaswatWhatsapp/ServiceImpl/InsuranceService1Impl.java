@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service;
 import com.example.SaswatWhatsapp.Repository.ApiLog1Repository;
 import com.example.SaswatWhatsapp.Repository.Insurance1Repo;
 import com.example.SaswatWhatsapp.Service.InsuranceService1;
-import com.example.SaswatWhatsapp.Utils.ApiLog;
 import com.example.SaswatWhatsapp.Utils.ApiLogentity;
 import com.example.SaswatWhatsapp.Utils.Insurance1Dto;
-import com.example.SaswatWhatsapp.Utils.InsuranceDTO;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +35,7 @@ public class InsuranceService1Impl implements InsuranceService1 {
 		this.insurance1Repo = insurance1Repo;
 	}
 
-	private JdbcTemplate jdbcTemplate;
+	private  JdbcTemplate jdbcTemplate;
 
 	public InsuranceService1Impl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;

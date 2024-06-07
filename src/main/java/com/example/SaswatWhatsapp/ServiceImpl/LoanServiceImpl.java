@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoanServiceImpl implements LoanService {
 
 	@Autowired
-	private LoanRepository loanRepository;
+   LoanRepository loanRepository;
 
 	@Autowired
 	private NewCustomRepository customRepository;
@@ -37,7 +37,7 @@ public class LoanServiceImpl implements LoanService {
 
 	private JdbcTemplate jdbcTemplate;
 
-	@Autowired
+	
 	public LoanServiceImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}

@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import com.example.SaswatWhatsapp.Repository.ApiLogRepository;
+import com.example.SaswatWhatsapp.Repository.Insurance1Repo;
 import com.example.SaswatWhatsapp.Repository.InsuranceRepo;
 import com.example.SaswatWhatsapp.Repository.NewInsuranceCustomRepository;
 import com.example.SaswatWhatsapp.Service.InsuranceService;
@@ -27,17 +28,21 @@ import jakarta.servlet.http.HttpServletResponse;
 public class InsuranceServiceImpl implements InsuranceService {
 
 	@Autowired
-	private InsuranceRepo insuranceRepo;
+	 InsuranceRepo insuranceRepo;
 
 	@Autowired
 	ApiLogRepository apiLogRepository;
 	
 	@Autowired
 	NewInsuranceCustomRepository customRepository;
+	
+	public void InsuranceRepo(InsuranceRepo insuranceRepo) {
+		this.insuranceRepo = insuranceRepo;
+	}
 
 	private JdbcTemplate jdbcTemplate;
 
-	@Autowired
+	
 	public InsuranceServiceImpl(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}

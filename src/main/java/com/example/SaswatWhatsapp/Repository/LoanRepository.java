@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.SaswatWhatsapp.Utils.Loandto;
 @Repository
-public interface LoanRepository extends JpaRepository<Loandto, Long>{
+public interface LoanRepository extends JpaRepository<Loandto, Integer>{
 
 
 	@Query("SELECT s FROM Loandto s WHERE s.mobile_no = :mobileNo")
