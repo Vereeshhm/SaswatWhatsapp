@@ -1,14 +1,11 @@
 package com.example.SaswatWhatsapp.ServiceImpl;
 
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import com.example.SaswatWhatsapp.Repository.LoanApiRepository;
@@ -27,20 +24,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoanServiceImpl implements LoanService {
 
 	@Autowired
-   LoanRepository loanRepository;
+	LoanRepository loanRepository;
 
 	@Autowired
 	private NewCustomRepository customRepository;
 
 	@Autowired
 	private LoanApiRepository apiRepository;
-
-	private JdbcTemplate jdbcTemplate;
-
-	
-	public LoanServiceImpl(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
-	}
 
 	@Override
 	public ResponseEntity<Loandto> getloanrecordsByMobileNumber(String mobile_no, HttpServletRequest request,
@@ -53,36 +43,33 @@ public class LoanServiceImpl implements LoanService {
 
 		// Capture request body
 		String requestBodyJson = gson.toJson(mobile_no);
-		int statusCodeValue = response.getStatus();
 
+		// Create and save ApiLog
 		LoanApiLogs apiLogs = new LoanApiLogs();
 		apiLogs.setUrl(requestUrl);
 		apiLogs.setRequestBody(requestBodyJson);
 
 		ResponseEntity<Loandto> responseEntity;
-		// If no records found in JPA repository, fall back to JdbcTemplate
+		// If no records found in JPA repository, return not found response
 		if (resultsJPA.isEmpty()) {
-			String query = "SELECT mobile_no, saswat_loan_number, loan_amt,emi_amt , emi_date,total_no_installment,overdue_amt,overdue_interest FROM loan_details WHERE mobile_no = ?";
+			NewCustomentity entity = new NewCustomentity();
+			entity.setMobile_no(mobile_no);
+			customRepository.save(entity);
+			String errorMessage = "User with mobile number " + mobile_no + " does'nt exists";
+			apiLogs.setResponseBody(gson.toJson(errorMessage));
 
-			List<Loandto> resultsJdbcTemplate = jdbcTemplate.query(query, ps -> ps.setString(1, mobile_no),
-					new LoandtoRowMapper());
+			apiRepository.save(apiLogs);
 
-			if (resultsJdbcTemplate.isEmpty()) {
-				NewCustomentity entity = new NewCustomentity();
-				entity.setMobile_no(mobile_no);
-				customRepository.save(entity);
-				responseEntity = ResponseEntity.notFound().build();
-			} else {
+			return new ResponseEntity(errorMessage, HttpStatus.CONFLICT);
 
-				responseEntity = processResults(resultsJdbcTemplate.get(0));
-
-			}
 		} else {
+			// Mobile number found in JPA
 			responseEntity = processResults(resultsJPA.get(0));
-
 		}
+
 		apiLogs.setResponseBody(gson.toJson(responseEntity.getBody()));
 
+		// Save ApiLog
 		apiRepository.save(apiLogs);
 		return responseEntity;
 	}
@@ -90,23 +77,4 @@ public class LoanServiceImpl implements LoanService {
 	private ResponseEntity<Loandto> processResults(Loandto dto) throws IOException {
 		return ResponseEntity.ok(dto);
 	}
-
-	private static class LoandtoRowMapper implements RowMapper<Loandto> {
-		@Override
-		public Loandto mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Loandto dto = new Loandto();
-
-			dto.setMobile_no(rs.getString("mobile_no"));
-			dto.setSaswat_loan_number(rs.getString("saswat_loan_number"));
-			dto.setLoan_amt(rs.getString("loan_amt"));
-			dto.setEmi_amt(rs.getString("emi_amt"));
-			dto.setEmi_date(rs.getString("emi_date"));
-			dto.setTotal_no_installment(rs.getString("total_no_installment"));
-			dto.setOverdue_amt(rs.getString("overdue_amt"));
-			dto.setOverdue_interest(rs.getString("overdue_interest"));
-
-			return dto;
-		}
-	}
-
 }

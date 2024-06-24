@@ -13,4 +13,6 @@ public interface LoanRepository extends JpaRepository<Loandto, Integer>{
 
 	@Query("SELECT s FROM Loandto s WHERE s.mobile_no = :mobileNo")
     List<Loandto> findByMobile_no(String mobileNo);
+	
+	
 }
