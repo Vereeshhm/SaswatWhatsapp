@@ -40,37 +40,38 @@ public class InsuranceService1Impl implements InsuranceService1 {
 	public ResponseEntity<Insurance1Dto> getinsurance1ByMobileNumber(String mobile_no, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
-		 List<Insurance1Dto> resultsJPA = this.insurance1Repo.findByMobile_no(mobile_no);
+		List<Insurance1Dto> resultsJPA = this.insurance1Repo.findByMobile_no(mobile_no);
 
-	        String requestUrl = request.getRequestURL().toString();
-	        Gson gson = new Gson();
+		String requestUrl = request.getRequestURL().toString();
+		Gson gson = new Gson();
 
-	        // Capture request body
-	        String requestBodyJson = gson.toJson(mobile_no);
+		// Capture request body
+		String requestBodyJson = gson.toJson(mobile_no);
 
-	        // Create and save ApiLog
-	        ApiLogentity api1Log = new ApiLogentity();
-	        api1Log.setUrl(requestUrl);
-	        api1Log.setRequestBody(requestBodyJson);
+		// Create and save ApiLog
+		ApiLogentity api1Log = new ApiLogentity();
+		api1Log.setUrl(requestUrl);
+		api1Log.setRequestBody(requestBodyJson);
 
-	        ResponseEntity<Insurance1Dto> responseEntity;
-	        // If no records found in JPA repository, return not found response
-	        if (resultsJPA.isEmpty()) {
-	            responseEntity = ResponseEntity.notFound().build();
-	        } else {
-	            // Mobile number found in JPA
-	            responseEntity = processResults(resultsJPA.get(0));
-	        }
+		ResponseEntity<Insurance1Dto> responseEntity;
+		// If no records found in JPA repository, return not found response
+		if (resultsJPA.isEmpty()) {
+			responseEntity = ResponseEntity.notFound().build();
+		} else {
+			// Mobile number found in JPA
 
-	        api1Log.setResponseBody(gson.toJson(responseEntity.getBody()));
+			Insurance1Dto dto = resultsJPA.get(0);
 
-	        // Save ApiLog
-	        apiLog1Repository.save(api1Log);
+			responseEntity = ResponseEntity.ok(dto);
 
-	        return responseEntity;
-	    }
+		}
 
-	    private ResponseEntity<Insurance1Dto> processResults(Insurance1Dto dto) throws IOException {
-	        return ResponseEntity.ok(dto);
-	    }
+		api1Log.setResponseBody(gson.toJson(responseEntity.getBody()));
+
+		// Save ApiLog
+		apiLog1Repository.save(api1Log);
+
+		return responseEntity;
 	}
+
+}

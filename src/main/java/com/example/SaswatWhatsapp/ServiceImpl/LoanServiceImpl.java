@@ -41,16 +41,14 @@ public class LoanServiceImpl implements LoanService {
 		String requestUrl = request.getRequestURL().toString();
 		Gson gson = new Gson();
 
-		// Capture request body
 		String requestBodyJson = gson.toJson(mobile_no);
 
-		// Create and save ApiLog
 		LoanApiLogs apiLogs = new LoanApiLogs();
 		apiLogs.setUrl(requestUrl);
 		apiLogs.setRequestBody(requestBodyJson);
 
 		ResponseEntity<Loandto> responseEntity;
-		// If no records found in JPA repository, return not found response
+		
 		if (resultsJPA.isEmpty()) {
 			NewCustomentity entity = new NewCustomentity();
 			entity.setMobile_no(mobile_no);
@@ -64,17 +62,15 @@ public class LoanServiceImpl implements LoanService {
 
 		} else {
 			// Mobile number found in JPA
-			responseEntity = processResults(resultsJPA.get(0));
+
+			Loandto dto = resultsJPA.get(0);
+			responseEntity = ResponseEntity.ok(dto);
 		}
 
 		apiLogs.setResponseBody(gson.toJson(responseEntity.getBody()));
 
-		// Save ApiLog
 		apiRepository.save(apiLogs);
 		return responseEntity;
 	}
 
-	private ResponseEntity<Loandto> processResults(Loandto dto) throws IOException {
-		return ResponseEntity.ok(dto);
-	}
 }
